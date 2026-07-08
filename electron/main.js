@@ -41,21 +41,12 @@ async function captureAndSendCookies(win) {
     path: c.path,
   }));
 
-  // Use the SAME partition that mainWindow will later load in, and use
-  // that session's own fetch (session-aware) so the Set-Cookie response
-  // from Flask actually gets stored in this partition's cookie jar,
-  // instead of vanishing into the stateless global/main-process fetch.
-  const appSession = session.fromPartition('persist:app');
-
-  const resp = await appSession.fetch(`${BACKEND_URL}/api/auth/eminerva-session`, {
+  await fetch(`${BACKEND_URL}/api/auth/eminerva-session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ cookies }),
   });
-
-  if (!resp.ok) {
-    console.error('Failed to establish eMinerva session with backend:', resp.status, await resp.text());
-  }
 }
 
 function createMainWindow() {
@@ -72,10 +63,9 @@ function createMainWindow() {
 
 async function checkExistingSession() {
   try {
-    // Must check via the same partition's session-aware fetch, otherwise
-    // the Flask session cookie set in captureAndSendCookies is never sent.
-    const appSession = session.fromPartition('persist:app');
-    const resp = await appSession.fetch(`${BACKEND_URL}/api/auth/whoami`);
+    const resp = await fetch(`${BACKEND_URL}/api/auth/whoami`, {
+      credentials: 'include',
+    });
     if (resp.ok) {
       createMainWindow();
       return;
