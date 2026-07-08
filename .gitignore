@@ -2,3 +2,4 @@
 /.vscode
 *.pyc
 /backend/data
+/electron/node_modules

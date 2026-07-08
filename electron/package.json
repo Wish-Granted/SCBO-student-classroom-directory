@@ -1,0 +1,15 @@
+{
+  "name": "student-classroom-directory",
+  "version": "1.0.0",
+  "description": "Electron client for the student classroom phone number lookup",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}

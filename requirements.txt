@@ -3,3 +3,4 @@ python-dotenv
 gunicorn==26.0.0
 Flask-Session==0.8.0
 redis==8.0.1
+requests
