@@ -4,6 +4,7 @@ from .config import Config
 from .students.csv_repository import CSVStudentRepository
 from .students.routes import students_bp
 from .auth.routes import auth_bp
+from .eminerva.routes import eminerva_bp
 from .extensions import session_ext
 
 def create_app():
@@ -18,5 +19,6 @@ def create_app():
 
     app.register_blueprint(students_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(eminerva_bp)
 
     return app
