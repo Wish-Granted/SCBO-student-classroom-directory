@@ -12,4 +12,4 @@ class Config:
     SESSION_TYPE = "redis"
     SESSION_PERMANENT = False
     SESSION_USER_SINGER = True
-    SESSION_REDIS = redis.from_url(os.getenv("REDIS_URL", ...))
+    SESSION_REDIS = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))

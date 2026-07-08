@@ -15,7 +15,7 @@ def login():
     return jsonify({"message": f"logged in as {username}"}), 200
 
 @auth_bp.route("/whoami", methods=["GET"])
-def login():
+def whoami():
     user = session.get("user")
     if not user:
         return jsonify({"error": "not logged in"}), 401
