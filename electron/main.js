@@ -34,19 +34,28 @@ async function captureAndSendCookies(win) {
   const targetNames = ["MRHSession", "ASP.NET_SessionId"];
   const filteredCookies = rawCookies.filter(c => targetNames.includes(c.name));
 
-  const cookies = rawCookies.map((c) => ({
+  const cookies = filteredCookies.map((c) => ({
     name: c.name,
     value: c.value,
     domain: c.domain,
     path: c.path,
   }));
 
-  await fetch(`${BACKEND_URL}/api/auth/eminerva-session`, {
+  // Use the SAME partition that mainWindow will later load in, and use
+  // that session's own fetch (session-aware) so the Set-Cookie response
+  // from Flask actually gets stored in this partition's cookie jar,
+  // instead of vanishing into the stateless global/main-process fetch.
+  const appSession = session.fromPartition('persist:app');
+
+  const resp = await appSession.fetch(`${BACKEND_URL}/api/auth/eminerva-session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify({ cookies }),
   });
+
+  if (!resp.ok) {
+    console.error('Failed to establish eMinerva session with backend:', resp.status, await resp.text());
+  }
 }
 
 function createMainWindow() {
@@ -58,14 +67,15 @@ function createMainWindow() {
     },
   });
 
-  mainWindow.loadURL(BACKEND_URL);
+  mainWindow.loadURL("http://127.0.0.1:8000/api/students/search?q=Dylan");
 }
 
 async function checkExistingSession() {
   try {
-    const resp = await fetch(`${BACKEND_URL}/api/auth/whoami`, {
-      credentials: 'include',
-    });
+    // Must check via the same partition's session-aware fetch, otherwise
+    // the Flask session cookie set in captureAndSendCookies is never sent.
+    const appSession = session.fromPartition('persist:app');
+    const resp = await appSession.fetch(`${BACKEND_URL}/api/auth/whoami`);
     if (resp.ok) {
       createMainWindow();
       return;
