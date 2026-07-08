@@ -6,4 +6,6 @@ log_level = "debug"
 accesslog = "-"
 errorlog = "-"
 
+timeout = 30
+
 access_log_format = '%(t)s "%(r)s" %(s)s %(b)s %(L)ss'
