@@ -14,8 +14,10 @@ def build_session(cookies: list[dict]) -> requests.Session:
 def is_logged_in(requests_session: requests.Session, check_url: str = EMINERVA_CHECK_URL) -> bool:
     resp = requests_session.get(check_url, allow_redirects=True, timeout=10)
     if "bne.catholic.edu.au" in resp.url.lower():
+        print("failed 1")
         return False
     if LOGIN_MARKER in resp.text:
+        print("failed 2")
         return False
     return True
 
