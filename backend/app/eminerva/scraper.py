@@ -10,6 +10,9 @@ class EminervaSessionExpired(Exception):
 STUDENT_TIMETABLE_URL = "https://eminerva.bne.catholic.edu.au/eMinerva/Dialogs/TimetableDialog.aspx"
 
 def get_student_timetable(eminerva_session: requests.Session, student_id: str) -> dict:
+    if student_id[0] == "s":
+        student_id = student_id[1:]
+    
     resp = eminerva_session.get(STUDENT_TIMETABLE_URL, allow_redirects=True, timeout=10, params={"studentID": student_id})
     print("Url Checked: ", resp.url.lower())
     if "login" in resp.url.lower() or "primary" in resp.url.lower():
