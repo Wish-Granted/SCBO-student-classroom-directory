@@ -1,10 +1,12 @@
-const { app, BrowserWindow, session } = require('electron');
+const { app, BrowserWindow, session, ipcMain, Menu } = require('electron');
+const path = require('path');
 
 const EMINERVA_LOGIN_URL = 'https://eminerva.bne.catholic.edu.au/eMinerva';
-const EMINERVA_LOGGED_IN_URL_PATTERN = 'UserPreferences';
+const EMINERVA_LOGGED_IN_URL_PATTERN = 'eminerva.bne.catholic.edu.au';
 const BACKEND_URL = 'http://localhost:8000';
 
 let mainWindow;
+let loginWindow;
 
 function createLoginWindow() {
   if (loginWindow) {
@@ -27,7 +29,13 @@ function createLoginWindow() {
   });
 
   loginWindow.webContents.on('did-navigate', async (event, url) => {
-    if (url.includes(EMINERVA_LOGGED_IN_URL_PATTERN)) {
+    const is401Error = await loginWindow.webContents.executeJavaScript(`
+      (() => {
+        const errorHeading = document.querySelector('#content .content-container h2');
+        return errorHeading && errorHeading.innerText.includes('401 - Unauthorized');
+      })()
+    `);
+    if (url.includes(EMINERVA_LOGGED_IN_URL_PATTERN) && !is401Error) {
       await captureAndSendCookies(loginWindow);
       loginWindow.close();
 
@@ -153,5 +161,6 @@ async function checkExistingSession() {
 
 app.whenReady().then(() => {
   setupIpcHandlers()
+  buildMenu()
   checkExistingSession()
 });
