@@ -13,7 +13,8 @@ def build_session(cookies: list[dict]) -> requests.Session:
 
 def is_logged_in(requests_session: requests.Session, check_url: str = EMINERVA_CHECK_URL) -> bool:
     resp = requests_session.get(check_url, allow_redirects=True, timeout=10)
-    if "login" in resp.url.lower():
+    print("Url Checked: ", resp.url.lower())
+    if "login" in resp.url.lower() or "primary" in resp.url.lower():
         return False
     if LOGIN_MARKER in resp.text:
         return False

@@ -11,8 +11,8 @@ STUDENT_TIMETABLE_URL = "https://eminerva.bne.catholic.edu.au/eMinerva/Dialogs/T
 
 def get_student_timetable(eminerva_session: requests.Session, student_id: str) -> dict:
     resp = eminerva_session.get(STUDENT_TIMETABLE_URL, allow_redirects=True, timeout=10, params={"studentID": student_id})
-
-    if "login" in resp.url.lower():
+    print("Url Checked: ", resp.url.lower())
+    if "login" in resp.url.lower() or "primary" in resp.url.lower():
         raise EminervaSessionExpired()
 
     soup = BeautifulSoup(resp.text, "html.parser")
