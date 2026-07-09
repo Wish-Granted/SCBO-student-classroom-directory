@@ -7,7 +7,12 @@ const BACKEND_URL = 'http://localhost:8000';
 let mainWindow;
 
 function createLoginWindow() {
-  const loginWin = new BrowserWindow({
+  if (loginWindow) {
+    loginWindow.focus();
+    return;
+  }
+
+  loginWindow = new BrowserWindow({
     width: 500,
     height: 700,
     webPreferences: {
@@ -15,13 +20,22 @@ function createLoginWindow() {
     },
   });
 
-  loginWin.loadURL(EMINERVA_LOGIN_URL);
+  loginWindow.loadURL(EMINERVA_LOGIN_URL);
 
-  loginWin.webContents.on('did-navigate', async (event, url) => {
+  loginWindow.on('closed', () => {
+    loginWindow = null;
+  });
+
+  loginWindow.webContents.on('did-navigate', async (event, url) => {
     if (url.includes(EMINERVA_LOGGED_IN_URL_PATTERN)) {
-      await captureAndSendCookies(loginWin);
-      loginWin.close();
-      createMainWindow();
+      await captureAndSendCookies(loginWindow);
+      loginWindow.close();
+
+      if (mainWindow) {
+        mainWindow.webContents.reload();
+      } else {
+        createMainWindow();
+      }
     }
   });
 }
@@ -64,13 +78,60 @@ function createMainWindow() {
     height: 800,
     webPreferences: {
       session: session.fromPartition('persist:app'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: path.join(__dirname, "preload.js")
     },
   });
-
-  mainWindow.loadURL("http://localhost:8000/api/students/search?q=Dylan")
+  mainWindow.loadURL("http://localhost:8000/")
     .catch((err) => {
       console.error('Failed to load main window URL — is the backend running on the expected port?', err);
     });
+}
+
+function setupIpcHandlers() {
+  ipcMain.on('eminerva-session-expired', handleSessionExpired);
+}
+
+function handleSessionExpired() {
+  createLoginWindow();
+}
+
+async function logout() {
+  await session.fromPartition('persist:eminerva').clearStorageData();
+
+  try {
+    await fetch(`${BACKEND_URL}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+  } catch (e) {
+    // backend unreachable -- still proceed with local logout
+  }
+
+  if (mainWindow) {
+    mainWindow.close();
+    mainWindow = null;
+  }
+
+  createLoginWindow();
+}
+
+function buildMenu() {
+  const template = [
+    {
+      label: 'File',
+      submenu: [
+        { label: 'Log out', click: logout },
+        { role: 'quit' },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [{ role: 'toggleDevTools' }, { role: 'reload' }],
+    },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
 async function checkExistingSession() {
@@ -90,4 +151,7 @@ async function checkExistingSession() {
   createLoginWindow();
 }
 
-app.whenReady().then(checkExistingSession);
+app.whenReady().then(() => {
+  setupIpcHandlers()
+  checkExistingSession()
+});
