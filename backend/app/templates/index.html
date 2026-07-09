@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Lookup</title>
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</head>
+<body>
+  <h1>Student Search</h1>
+  <input id="studentSearchBox" placeholder="Search students...">
+  <button onclick="doStudentSearch()">Search</button>
+  <pre id="results"></pre>
+
+  <h1>Timetable Search</h1>
+  <input id="timetableSearchBox" placeholder="Search a student timetable...">
+  <button onclick="doTimetableSearch()">Search</button>
+  <pre id="results"></pre>
+
+  <script>
+    async function doStudentSearch() {
+      const q = document.getElementById('studentSearchBox').value;
+      const resp = await apiFetch(`/api/students/search?q=${encodeURIComponent(q)}`);
+      const data = await resp.json();
+      document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+    }
+    async function doTimetableSearch() {
+      const q = document.getElementById('timetableSearchBox').value;
+      const resp = await apiFetch(`/api/eminerva/timetable/${encodeURIComponent(q)}`);
+      const data = await resp.json();
+      document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
