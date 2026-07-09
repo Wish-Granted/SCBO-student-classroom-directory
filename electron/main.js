@@ -67,7 +67,7 @@ function createMainWindow() {
     },
   });
 
-  mainWindow.loadURL("http://127.0.0.1:8000/api/students/search?q=Dylan")
+  mainWindow.loadURL("http://localhost:8000/api/students/search?q=Dylan")
     .catch((err) => {
       console.error('Failed to load main window URL — is the backend running on the expected port?', err);
     });

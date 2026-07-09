@@ -12,7 +12,7 @@ STUDENT_TIMETABLE_URL = "https://eminerva.bne.catholic.edu.au/eMinerva/Dialogs/T
 def get_student_timetable(eminerva_session: requests.Session, student_id: str) -> dict:
     resp = eminerva_session.get(STUDENT_TIMETABLE_URL, allow_redirects=True, timeout=10, params={"studentID": student_id})
 
-    if "bne.catholic.edu.au" in resp.url.lower():
+    if "login" in resp.url.lower():
         raise EminervaSessionExpired()
 
     soup = BeautifulSoup(resp.text, "html.parser")
@@ -28,7 +28,6 @@ def get_student_timetable(eminerva_session: requests.Session, student_id: str) -
 
     today_name = datetime.datetime.now().strftime("%A")  # e.g. "Tuesday"
     classes = get_today_classes(soup, weekday=today_name)
-    print(classes)
     
     return classes
 
