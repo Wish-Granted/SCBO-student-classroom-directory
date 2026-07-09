@@ -10,10 +10,15 @@ eminerva_bp = Blueprint("eminerva", __name__, url_prefix="/api/eminerva")
 @login_required
 def timetable(student_id):
     eminerva_session = get_eminerva_session()
-    try:
-        data = get_student_timetable(eminerva_session, student_id)
-    except EminervaSessionExpired:
-        session.pop("eminerva_cookies", None)
-        return jsonify({"error": "eMinerva session expired, please log in again"}), 401
-    
+    attemps = 0
+    while attemps < 2:
+        try:
+            data = get_student_timetable(eminerva_session, student_id)
+        except ValueError:
+            attemps += 1
+            continue
+        except EminervaSessionExpired:
+            session.pop("eminerva_cookies", None)
+            return jsonify({"error": "eMinerva session expired, please log in again"}), 401
+        break
     return jsonify(data)
