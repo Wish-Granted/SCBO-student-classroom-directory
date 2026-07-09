@@ -5,16 +5,18 @@
   <script src="{{ url_for('static', filename='js/api.js') }}"></script>
 </head>
 <body>
-  <h1>Student Search</h1>
-  <input id="studentSearchBox" placeholder="Search students...">
-  <button onclick="doStudentSearch()">Search</button>
-  <pre id="results"></pre>
+  <div style="float: left;">
+    <h1>Student Search</h1>
+    <input id="studentSearchBox" placeholder="Search students...">
+    <button onclick="doStudentSearch()">Search</button>
 
-  <h1>Timetable Search</h1>
-  <input id="timetableSearchBox" placeholder="Search a student timetable...">
-  <button onclick="doTimetableSearch()">Search</button>
-  <pre id="results"></pre>
-
+    <h1>Timetable Search</h1>
+    <input id="timetableSearchBox" placeholder="Search a student timetable...">
+    <button onclick="doTimetableSearch()">Search</button>
+  </div>
+  <div style="float: left; margin-left: 100px;">
+    <pre id="results"></pre>
+  </div>
   <script>
     async function doStudentSearch() {
       const q = document.getElementById('studentSearchBox').value;
