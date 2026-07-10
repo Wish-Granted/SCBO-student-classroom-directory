@@ -17,7 +17,7 @@ def create_app():
     
     #change when using LDAP
     app.student_repository = CSVStudentRepository(app.config["STUDENT_DATA_PATH"])
-
+    
     app.register_blueprint(students_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(eminerva_bp)
