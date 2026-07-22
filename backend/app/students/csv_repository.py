@@ -28,6 +28,8 @@ class CSVStudentRepository(StudentRepository):
                 or query in s["year_level"].lower()]
 
     def get_by_id(self, student_id: str) -> dict | None:
+        if student_id[0] != "s":
+            student_id = "s" + student_id
         for student in self._students:
             if student["id"] == student_id:
                 return student
