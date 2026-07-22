@@ -112,6 +112,11 @@ def get_today_classes(soup, weekday="Monday"):
     return results
 
 
+def get_attendance_from_soup(soup):
+    with open("TESTING.html", "w") as f:
+        f.write(soup)
+
+
 if __name__ == "__main__":
     import sys
     import json

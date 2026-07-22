@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, session, current_app
 
 from app.utils.decorators import login_required
 from .session_helper import get_eminerva_session
-from .scraper import get_student_timetable, EminervaSessionExpired
+from .scraper import get_student_timetable, EminervaSessionExpired, get_student_current_attendance
 
 eminerva_bp = Blueprint("eminerva", __name__, url_prefix="/api/eminerva")
 
@@ -26,4 +26,13 @@ def timetable(student_id):
             session.pop("eminerva_cookies", None)
             return jsonify({"error": "eMinerva session expired, please log in again"}), 401
         break
+    return jsonify(data)
+
+@eminerva_bp.route("/attendance/<student_id>", methods=["GET"])
+@login_required
+def attendance(student_id):
+    eminerva_session = get_eminerva_session()
+    if not current_app.student_repository.get_by_id(student_id):
+        return jsonify({"error": "student not found"}), 404
+    data = get_student_current_attendance(eminerva_session, student_id)
     return jsonify(data)

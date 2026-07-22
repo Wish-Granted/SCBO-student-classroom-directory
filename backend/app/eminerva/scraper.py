@@ -2,12 +2,13 @@ from bs4 import BeautifulSoup
 import requests
 import datetime
 
-from .parse_timetable import get_today_classes
+from .parse_data import get_today_classes, get_attendance_from_soup
 
 class EminervaSessionExpired(Exception):
     pass
 
 STUDENT_TIMETABLE_URL = "https://eminerva.bne.catholic.edu.au/eMinerva/Dialogs/TimetableDialog.aspx"
+STUDENT_CONTROL_PANEL_URL =  "https://eminerva.bne.catholic.edu.au/eMinerva/Student/Pages/StudentControlPanel.aspx"
 
 def get_student_timetable(eminerva_session: requests.Session, student_id: str) -> dict:
     if student_id[0] == "s":
@@ -20,42 +21,20 @@ def get_student_timetable(eminerva_session: requests.Session, student_id: str) -
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    """
-    HOLIDAY TESTING IN HOLIDAYS DELETE ME LATER
-    """
-    resp = test(soup, STUDENT_TIMETABLE_URL, {"studentID": student_id}, eminerva_session)
-    soup = BeautifulSoup(resp.text, "html.parser")
-    """
-    ---------------------------------
-    """
-
     today_name = datetime.datetime.now().strftime("%A")  # e.g. "Tuesday"
     classes = get_today_classes(soup, weekday=today_name)
     
     return classes
 
+def get_student_current_attendance(eminerva_session: requests.Session, student_id: str) -> dict:
+    if student_id[0] == "s":
+        student_id = student_id[1:]
+    
+    resp = eminerva_session.get(STUDENT_CONTROL_PANEL_URL, allow_redirects=True, timeout=10, params={"studentID": student_id})
+    print("Url Checked: ", resp.url.lower())
+    if "login" in resp.url.lower() or "primary" in resp.url.lower():
+        raise EminervaSessionExpired()
 
-#REMOVE, USE FOR HOLIDAY TESTING TODO
-def test(soup, url, params, session):
-    def get_hidden_fields(soup):
-        fields = {}
-        for inp in soup.find_all("input", type="hidden"):
-            name = inp.get("name")
-            if name:
-                fields[name] = inp.get("value", "")
-        return fields
+    soup = BeautifulSoup(resp.text, "html.parser")
 
-    form_data = get_hidden_fields(soup)
-
-    # Step 2: override target for prev week
-    form_data["__EVENTTARGET"] = "StudentDialogTimetable1$nextWeekLink"
-    form_data["__EVENTARGUMENT"] = ""
-
-    # Step 3: POST back to the same URL
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Requested-With": "XMLHttpRequest",  # often needed for ASP.NET AJAX postbacks
-    }
-
-    resp2 = session.post(url, params=params, data=form_data, headers=headers)
-    return resp2
+    get_attendance_from_soup(soup)

@@ -13,10 +13,15 @@
     <h1>Timetable Search</h1>
     <input id="timetableSearchBox" placeholder="Search a student timetable...">
     <button onclick="doTimetableSearch()">Search</button>
+
+    <h1>Attendance Check</h1>
+    <input id="attendanceSearchBox" placeholder="Search a student timetable...">
+    <button onclick="doAttendanceCheck()">Search</button>
   </div>
   <div style="float: left; margin-left: 100px;">
     <pre id="results"></pre>
   </div>
+
   <script>
     async function doStudentSearch() {
       const q = document.getElementById('studentSearchBox').value;
@@ -27,6 +32,12 @@
     async function doTimetableSearch() {
       const q = document.getElementById('timetableSearchBox').value;
       const resp = await apiFetch(`/api/eminerva/timetable/${encodeURIComponent(q)}`);
+      const data = await resp.json();
+      document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+    }
+    async function doAttendanceCheck() {
+      const q = document.getElementById('attendanceSearchBox').value;
+      const resp = await apiFetch(`/api/eminerva/attendance/${encodeURIComponent(q)}`);
       const data = await resp.json();
       document.getElementById('results').textContent = JSON.stringify(data, null, 2);
     }
