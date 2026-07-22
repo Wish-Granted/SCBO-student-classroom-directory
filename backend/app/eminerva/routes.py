@@ -10,9 +10,9 @@ eminerva_bp = Blueprint("eminerva", __name__, url_prefix="/api/eminerva")
 @login_required
 def timetable(student_id):
     eminerva_session = get_eminerva_session()
-    attemps = 0
     if not current_app.student_repository.get_by_id(student_id):
         return jsonify({"error": "student not found"}), 404
+    attemps = 0
     while attemps < 2:
         try:
             data = get_student_timetable(eminerva_session, student_id)
@@ -34,5 +34,18 @@ def attendance(student_id):
     eminerva_session = get_eminerva_session()
     if not current_app.student_repository.get_by_id(student_id):
         return jsonify({"error": "student not found"}), 404
-    data = get_student_current_attendance(eminerva_session, student_id)
+    attemps = 0
+    while attemps < 2:
+        try:
+            data = get_student_current_attendance(eminerva_session, student_id)
+        except ValueError as e:
+            if attemps > 0:
+                raise e
+            attemps += 1
+            print("Retried fetching student attendance")
+            continue
+        except EminervaSessionExpired:
+            session.pop("eminerva_cookies", None)
+            return jsonify({"error": "eMinerva session expired, please log in again"}), 401
+        break
     return jsonify(data)
