@@ -30,11 +30,13 @@ def get_student_current_attendance(eminerva_session: requests.Session, student_i
     if student_id[0] == "s":
         student_id = student_id[1:]
     
-    resp = eminerva_session.get(STUDENT_CONTROL_PANEL_URL, allow_redirects=True, timeout=10, params={"studentID": student_id})
+    resp = eminerva_session.get(STUDENT_CONTROL_PANEL_URL, allow_redirects=True, timeout=10, params={"studentNo": student_id})
     print("Url Checked: ", resp.url.lower())
     if "login" in resp.url.lower() or "primary" in resp.url.lower():
         raise EminervaSessionExpired()
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    get_attendance_from_soup(soup)
+    attendance_status = get_attendance_from_soup(soup)
+
+    return attendance_status

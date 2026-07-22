@@ -27,7 +27,7 @@ def parse_classroom_info(raw):
     return {"raw": raw, "location": raw, "phone": ""}
 
 
-def get_today_classes(soup, weekday="Monday"):
+def get_today_classes(soup: BeautifulSoup, weekday="Monday"):
     """
     weekday: one of Monday, Tuesday, Wednesday, Thursday, Friday
     Returns a list of dicts, one per period (Pastoral Care..Period 5),
@@ -112,10 +112,25 @@ def get_today_classes(soup, weekday="Monday"):
     return results
 
 
-def get_attendance_from_soup(soup):
-    with open("TESTING.html", "w") as f:
-        f.write(soup)
+def get_attendance_from_soup(soup: BeautifulSoup):
+    table = soup.find("table", {"id": lambda x: x and "gvLocations" in x})
+    if table is None:
+        raise ValueError("Could not find classes preview table in response.txt")
+    for row in table.find_all("tr"):
+        cells = row.find_all("td")
+        previous_attendance_status = None
+        current_attendance_status = None
+        if cells and "Previous" in cells[0].text:
+            previous_attendance_status = cells[6].get("title")
+        elif cells and "Current" in cells[0].text:
+            current_attendance_status = cells[6].get("title")
 
+    if not current_attendance_status:
+        if not previous_attendance_status:
+            return "N/A"
+        return previous_attendance_status
+    else:
+        return current_attendance_status
 
 if __name__ == "__main__":
     import sys
