@@ -49,3 +49,22 @@ def attendance(student_id):
             return jsonify({"error": "eMinerva session expired, please log in again"}), 401
         break
     return jsonify(data)
+
+@eminerva_bp.route("/info/<student_id>", methods=["GET"])
+@login_required
+def info(student_id):
+    eminerva_session = get_eminerva_session()
+    if not current_app.student_repository.get_by_id(student_id):
+        return jsonify({"error": "student not found"}), 404
+    try:
+        timetable = get_student_timetable(eminerva_session, student_id)
+        attendance_status = get_student_current_attendance(eminerva_session, student_id)
+        data = {
+            "student_id": student_id,
+            "attendance_status": attendance_status,
+            "timetable": timetable,
+        }
+    except EminervaSessionExpired:
+        session.pop("eminerva_cookies", None)
+        return jsonify({"error": "eMinerva session expired, please log in again"}), 401
+    return jsonify(data)

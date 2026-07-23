@@ -17,6 +17,10 @@
     <h1>Attendance Check</h1>
     <input id="attendanceSearchBox" placeholder="Check student attendance...">
     <button onclick="doAttendanceCheck()">Search</button>
+
+    <h1>Full Student Search</h1>
+    <input id="fullStudentSearchBox" placeholder="Get student information...">
+    <button onclick="doFullStudentSearch()">Search</button>
   </div>
   <div style="float: left; margin-left: 100px;">
     <pre id="results"></pre>
@@ -38,6 +42,12 @@
     async function doAttendanceCheck() {
       const q = document.getElementById('attendanceSearchBox').value;
       const resp = await apiFetch(`/api/eminerva/attendance/${encodeURIComponent(q)}`);
+      const data = await resp.json();
+      document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+    }
+    async function doFullStudentSearch() {
+      const q = document.getElementById('fullStudentSearchBox').value;
+      const resp = await apiFetch(`/api/eminerva/info/${encodeURIComponent(q)}`);
       const data = await resp.json();
       document.getElementById('results').textContent = JSON.stringify(data, null, 2);
     }
