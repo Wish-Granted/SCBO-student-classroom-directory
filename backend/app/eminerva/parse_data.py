@@ -9,7 +9,7 @@ Usage:
 """
 
 from bs4 import BeautifulSoup
-
+from datetime import datetime
 
 def parse_classroom_info(raw):
     """
@@ -102,7 +102,7 @@ def get_today_classes(soup: BeautifulSoup, weekday="Monday"):
             classroom_raw = cell_texts[2] if len(cell_texts) > 2 else ""
 
         results.append({
-            "period": period_text,
+            "period_info": parse_period_info(period_text),
             "class_code": class_code,
             "class_name": class_name,
             "teacher_name": teacher_name,
@@ -110,7 +110,6 @@ def get_today_classes(soup: BeautifulSoup, weekday="Monday"):
         })
 
     return results
-
 
 def get_attendance_from_soup(soup: BeautifulSoup):
     table = soup.find("table", {"id": lambda x: x and "gvLocations" in x})
@@ -139,7 +138,28 @@ def get_attendance_from_soup(soup: BeautifulSoup):
     else:
         print("No Attendance Status Found")
         return "N/A"
-        
+
+def parse_period_info(raw: str):
+    """
+    '9:30 AM - 10:30 AM Period 2' -> {'raw': '9:30 AM - 10:30 AM Period 2', 'period_name': 'Period 2', 'start_time': 9:30 AM, 'end_time': 10:30 AM}
+    """
+    raw = raw.strip()
+
+    if raw.find(" AM ") != -1:
+        start_time, other_raw = raw.split(" - ", 1)
+        start_time = datetime.strptime(start_time, "%I:%M %p")
+        start_time = start_time.isoformat()
+
+        other_split = other_raw.split(" ", 3)
+
+        end_time = f"{other_split[0]} {other_split[1]}"
+        end_time = datetime.strptime(end_time, "%I:%M %p")
+        end_time = end_time.isoformat()
+
+        period_name = f"{other_split[2]} {other_split[3]}"
+
+
+        return {"raw": raw, "period_name": period_name, "start_time": start_time, "end_time": end_time}
 
 if __name__ == "__main__":
     import sys
