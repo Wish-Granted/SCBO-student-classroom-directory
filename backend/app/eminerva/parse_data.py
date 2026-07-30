@@ -116,23 +116,30 @@ def get_attendance_from_soup(soup: BeautifulSoup):
     table = soup.find("table", {"id": lambda x: x and "gvLocations" in x})
     if table is None:
         raise ValueError("Could not find classes preview table in response.txt")
+    previous_attendance_status = None
+    current_attendance_status = None
+    next_attendance_status = None
     for row in table.find_all("tr"):
         cells = row.find_all("td")
-        previous_attendance_status = None
-        current_attendance_status = None
         if cells and "Previous" in cells[0].text:
             previous_attendance_status = cells[-1].get("title")
         elif cells and "Current" in cells[0].text:
             current_attendance_status = cells[-1].get("title")
+        elif cells and "Next" in cells[0].text:
+            next_attendance_status = cells[-1].get("title")
 
-    if not current_attendance_status:
-        if not previous_attendance_status:
-            print("No Attendance Status Found")
-            return "N/A"
+    if current_attendance_status:
+        return current_attendance_status
+    elif previous_attendance_status:
         print("Used Previous Attendance Status")
         return previous_attendance_status
+    elif next_attendance_status:
+        print("Used Next Attendance Status")
+        return next_attendance_status
     else:
-        return current_attendance_status
+        print("No Attendance Status Found")
+        return "N/A"
+        
 
 if __name__ == "__main__":
     import sys
