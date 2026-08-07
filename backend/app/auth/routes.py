@@ -22,7 +22,9 @@ def create_eminerva_session():
         return jsonify({"error": "eMinerva session invalid or expired"}), 401
     
     session.permanent = True
-    session["eminerva_cookies"] = serialize_cookies(eminerva_session)
+    target_names = {"MRHSession", "ASP.NET_SessionId"}
+    serialized = serialize_cookies(eminerva_session)
+    session["eminerva_cookies"] = [c for c in serialized if c["name"] in target_names]
     session["user"] = username
 
     return jsonify({"message": "eMinerva session stored"})
