@@ -8,6 +8,8 @@ const BACKEND_URL = 'http://localhost:8000';
 let mainWindow;
 let loginWindow;
 
+let username;
+
 function createLoginWindow() {
   if (loginWindow) {
     loginWindow.focus();
@@ -72,7 +74,7 @@ async function captureAndSendCookies(win) {
   const resp = await appSession.fetch(`${BACKEND_URL}/api/auth/eminerva-session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cookies }),
+    body: JSON.stringify({ cookies, username }),
   });
 
   if (!resp.ok) {
@@ -172,6 +174,39 @@ async function checkExistingSession() {
 }
 
 app.whenReady().then(() => {
+
+  //TESTING//
+  const TARGET_URL = 'https://primary.bne.catholic.edu.au/my.policy'
+
+  function attachRequestLogger(ses) {
+    ses.webRequest.onBeforeRequest((details, callback) => {
+      if (
+        details.method === 'POST' &&
+        details.url === TARGET_URL &&
+        details.uploadData?.length
+      ) {
+        const buffers = details.uploadData
+          .filter(part => part.bytes)
+          .map(part => part.bytes)
+
+        if (buffers.length) {
+          const payload = Buffer.concat(buffers).toString('utf-8')
+
+          // Pull out just the flags value
+          const params = new URLSearchParams(payload)
+          if (params.has('username')) {
+            username = params.get('username')
+            console.log('username:', username)
+          }
+        }
+      }
+
+      callback({ cancel: false })
+    })
+  }
+
+  attachRequestLogger(session.fromPartition('persist:eminerva'))
+
   setupIpcHandlers()
   buildMenu()
   checkExistingSession()

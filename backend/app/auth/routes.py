@@ -8,7 +8,11 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 def create_eminerva_session():
     data = request.get_json(silent=True) or {}
     cookies = data.get("cookies")
-
+    username: str = data.get("username")
+    if "@" in username:
+        username = username[:username.index("@")]
+    _, username = username.split("\\")
+    print(username)
     if not cookies:
         return jsonify({"error": "cookies required"}), 400
 
@@ -19,7 +23,7 @@ def create_eminerva_session():
     
     session.permanent = True
     session["eminerva_cookies"] = serialize_cookies(eminerva_session)
-    session["user"] = "unknown" #TODO SCRAPE USERNAME
+    session["user"] = username
 
     return jsonify({"message": "eMinerva session stored"})
 
