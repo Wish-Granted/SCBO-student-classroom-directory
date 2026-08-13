@@ -127,12 +127,17 @@ async function logout() {
   createLoginWindow();
 }
 
+function whoami() {
+  mainWindow.loadURL(BACKEND_URL+"/api/auth/whoami")
+}
+
 function buildMenu() {
   const template = [
     {
       label: 'File',
       submenu: [
         { label: 'Log out', click: logout },
+        { label: 'whoami', click: whoami },
         { role: 'quit' },
       ],
     },
@@ -175,7 +180,6 @@ async function checkExistingSession() {
 
 app.whenReady().then(() => {
 
-  //TESTING//
   const TARGET_URL = 'https://primary.bne.catholic.edu.au/my.policy'
 
   function attachRequestLogger(ses) {
