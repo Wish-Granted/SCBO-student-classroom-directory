@@ -9,12 +9,16 @@ def create_eminerva_session():
     data = request.get_json(silent=True) or {}
     cookies = data.get("cookies")
     username: str = data.get("username")
+    
+    if not cookies:
+        return jsonify({"error": "cookies required"}), 400
+
+    if not username:
+        return jsonify({"error": "username not found"}), 400
     if "@" in username:
         username = username[:username.index("@")]
     _, username = username.split("\\")
     print(username)
-    if not cookies:
-        return jsonify({"error": "cookies required"}), 400
 
     eminerva_session = build_session(cookies)
 
