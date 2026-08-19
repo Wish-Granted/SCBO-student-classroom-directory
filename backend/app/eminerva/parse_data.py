@@ -145,7 +145,7 @@ def parse_period_info(raw: str):
     """
     raw = raw.strip()
 
-    if raw.find(" AM ") != -1:
+    if raw.find(" AM ") != -1 or raw.find(" PM ") != -1:
         start_time, other_raw = raw.split(" - ", 1)
         start_time = datetime.strptime(start_time, "%I:%M %p")
         start_time = start_time.isoformat()
