@@ -6,7 +6,7 @@ from ..eminerva.session_helper import get_eminerva_session
 
 from ..auth.eminerva_client import is_logged_in
 
-EMINERVA_CHECK_TTL_SECONDS = 600
+EMINERVA_CHECK_TTL_SECONDS = 21600
 
 def login_required(f):
     @wraps(f)
