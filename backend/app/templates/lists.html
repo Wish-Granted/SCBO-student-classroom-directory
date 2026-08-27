@@ -1,0 +1,39 @@
+<!-- templates/lists.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lists</title>
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/lists.js') }}"></script>
+</head>
+<body>
+  <a href="{{ url_for('main.index') }}">&larr; Back to search</a>
+
+  <h1>Lists</h1>
+  <button onclick="doGetLists()">Show all lists</button>
+  <br><br>
+  <input id="listNameBox" placeholder="New list name">
+  <input id="listDescriptionBox" placeholder="New list description">
+  <button onclick="doCreateList()">Create list</button>
+  <br><br>
+  <input id="openDeletelistIdBox" placeholder="List ID">
+  <button onclick="doGetListDetail()">Open list</button>
+  <button onclick="doDeleteList()">Delete list</button>
+  <br><br>
+  <input id="updateListIdBox" placeholder="List ID">
+  <input id="updateListNameBox" placeholder="Updated list name">
+  <input id="updateListDescriptionBox" placeholder="Updated list description">
+  <button onclick="doUpdateListDetails()">Update list</button>
+  <br><br>
+  <input id="calledDeleteAddListIdBox" placeholder="List ID">
+  <input id="calledDeleteAddStudentIdBox" placeholder="Student ID">
+  <button onclick="doAddStudentToList()">Add to list</button>
+  <button onclick="doRemoveStudentFromList()">Delete Student</button>
+  <button onclick="doMarkCalled(true)">Mark called</button>
+  <button onclick="doMarkCalled(false)">Unmark called</button>
+
+  <div style="margin-top: 40px;">
+    <pre id="results"></pre>
+  </div>
+</body>
+</html>

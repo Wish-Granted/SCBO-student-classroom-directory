@@ -24,7 +24,7 @@ def get_lists():
 @lists_bp.route("", methods = ["POST"])
 @login_required
 def create_list():
-    data = request.args.get(silent=True) or {}
+    data = request.get_json(silent=True) or {}
 
     name = data.get("name")
     if not name:
@@ -47,7 +47,7 @@ def get_list_detail(list_id):
 @lists_bp.route("/<int:list_id>", methods=["PUT"])
 @login_required
 def update_list(list_id):
-    data = request.args.get(silent=True) or {}
+    data = request.get_json(silent=True) or {}
     updated = current_app.list_repository.update_list(list_id, data.get("name"), data.get("description"))
     if not updated:
         return jsonify({"error": "not found"}), 404
@@ -63,7 +63,7 @@ def delete_list(list_id):
 @lists_bp.route("/<int:list_id>/students", methods=["POST"])
 @login_required
 def add_students(list_id):
-    data = request.args.get(silent=True) or {}
+    data = request.get_json(silent=True) or {}
     student_ids = data.get("student_ids")
     if not student_ids:
         return jsonify({"error": "student_ids required"}), 400
@@ -75,8 +75,6 @@ def add_students(list_id):
 @lists_bp.route("/<int:list_id>/students/<student_id>", methods=["DELETE"])
 @login_required
 def remove_student(list_id, student_id):
-    data = request.args.get(silent=True) or {}
-    current_app.list_repository.remove_student(list_id, student_id)
     if not current_app.list_repository.remove_student(list_id, student_id):
         return jsonify({"error": "not found"}), 404
     return jsonify({"message": "removed"})

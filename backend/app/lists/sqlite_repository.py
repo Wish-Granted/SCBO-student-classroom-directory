@@ -50,40 +50,40 @@ class SQLiteRepository(ListRepository):
 
     def get_list(self, list_id: int) -> dict | None:
         with self._connect() as conn:
-            row = conn.execute("SELECT * FROM lists WHERE id = ?", (list_id)).fetchone()
+            row = conn.execute("SELECT * FROM lists WHERE id = ?", (str(list_id))).fetchone()
             return dict(row) if row else None
 
     def update_list(self, list_id: int, name: str = None, description: str =None) -> dict | None:
-        current = self.get_list(list)
+        current = self.get_list(list_id)
         if not current:
             return None
         name = name if name is not None else current[name]
         description = description if description is not None else current[description]
 
         with self._connect() as conn:
-            conn.execute("UPDATE lists SET name = ?, description = ? WHERE id = ?", (name, description, list_id))
+            conn.execute("UPDATE lists SET name = ?, description = ? WHERE id = ?", (name, description, str(list_id)))
 
         return self.get_list(list_id)
 
     def delete_list(self, list_id: int):
         with self._connect() as conn:
-            cur = conn.execute("DELETE FROM lists WHERE id = ?", (list_id))
+            cur = conn.execute("DELETE FROM lists WHERE id = ?", (str(list_id)))
             return cur.rowcount > 0
 
     def add_students(self, list_id: int, student_ids: list[str]) -> list[dict]:
         with self._connect() as conn:
-            conn.executemany("INSERT OR IGNORE INTO list_items (list_id, student_id) VALUES (?, ?)", [(list_id, sid) for sid in student_ids])
+            conn.executemany("INSERT OR IGNORE INTO list_items (list_id, student_id) VALUES (?, ?)", [(str(list_id), sid) for sid in student_ids])
 
         return self.get_list_items(list_id)
 
     def remove_student(self, list_id: int, student_id: str) -> bool:
         with self._connect() as conn:
-            cur = conn.execute("DELETE FROM list_items WHERE list_id = ? AND student_id = ?",(list_id, student_id))
+            cur = conn.execute("DELETE FROM list_items WHERE list_id = ? AND student_id = ?",(str(list_id), student_id))
             return cur.rowcount > 0
 
     def get_list_items(self, list_id: int) -> list[dict]:
         with self._connect() as conn:
-            rows = conn.execute("SELECT * FROM list_items WHERE list_id = ? ORDER BY added_at", (list_id)).fetchall()
+            rows = conn.execute("SELECT * FROM list_items WHERE list_id = ? ORDER BY added_at", (str(list_id))).fetchall()
             return [dict(r) for r in rows]
 
     def set_called(self, list_id: int, student_id: str, called: bool) -> dict | None:
@@ -93,5 +93,5 @@ class SQLiteRepository(ListRepository):
                             WHERE list_id = ? AND student_id = ?""", 
                             (int(called), int(called), list_id, student_id)
             )
-            row = conn.execute("SELECT * FROM list_items WHERE list_id = ? AND student_id = ?", (list_id, student_id)).fetchone()
+            row = conn.execute("SELECT * FROM list_items WHERE list_id = ? AND student_id = ?", (str(list_id), student_id)).fetchone()
             return dict(row) if row else None
