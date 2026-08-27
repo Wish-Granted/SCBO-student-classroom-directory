@@ -85,6 +85,7 @@
       <table id="studentTable">
       </table>
       <br>
+      <h3 style="display:inline;">Raw Data:</h3>
       <table id="timetableTable">
       </table>
       <pre id="results"></pre>
@@ -265,7 +266,7 @@
         const endMs = getMsSinceMidnight(endTime)
         if (nowMs >= startMs && nowMs < endMs) {
           currentPeriodData = periodData
-          periodSelection.value = periodName
+          periodSelection.value = indexCount
         } else if (nowMs > startMs) {
           currentPeriodData = periodData
           periodSelection.value = indexCount
@@ -323,7 +324,7 @@
 
       displayAttendance(data.attendance_status)
       displayTimetableData(data.timetable)
-      displayPeriodData(data, q)
+      displayPeriodData(data.timetable, q)
 
       document.getElementById('results').textContent = JSON.stringify(data, null, 2);
     }
