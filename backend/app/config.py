@@ -7,6 +7,7 @@ load_dotenv()
 
 class Config:
     STUDENT_DATA_PATH = os.getenv("STUDENT_DATA_PATH", "data/students.csv")
+    LISTS_DB_PATH = os.getenv("LISTS_DB_PATH", "data/lists.db")
 
     SECRET_KEY = os.getenv("SECRET_KEY")
 

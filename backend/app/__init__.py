@@ -3,6 +3,8 @@ from flask import Flask
 from .config import Config
 from .students.csv_repository import CSVStudentRepository
 from .students.routes import students_bp
+from .lists.sqlite_repository import SQLiteListRepository
+from .lists.routes import lists_bp
 from .auth.routes import auth_bp
 from .eminerva.routes import eminerva_bp
 from .main.routes import main_bp
@@ -15,12 +17,13 @@ def create_app():
 
     session_ext.init_app(app)
     
-    #change when using LDAP
-    app.student_repository = CSVStudentRepository(app.config["STUDENT_DATA_PATH"])
+    app.student_repository = CSVStudentRepository(app.config["STUDENT_DATA_PATH"]) #change when using LDAP
+    app.list_repository = SQLiteListRepository(app.config["LISTS_DB_PATH"])
     
     app.register_blueprint(students_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(eminerva_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(lists_bp)
 
     return app
