@@ -33,6 +33,13 @@ async function doDeleteList() {
   document.getElementById('results').textContent = JSON.stringify(data, null, 2);
 }
 
+async function doGetAllStudentInfo() {
+  const id = document.getElementById('openDeletelistIdBox').value;
+  const resp = await apiFetch(`/api/lists/${encodeURIComponent(id)}/info`);
+  const data = await resp.json();
+  document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+}
+
 async function doUpdateListDetails() {
   const id = document.getElementById('updateListIdBox').value;
   const name = document.getElementById('updateListNameBox').value;
