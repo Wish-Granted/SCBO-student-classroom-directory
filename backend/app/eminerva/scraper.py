@@ -22,9 +22,9 @@ def get_student_timetable(eminerva_session: requests.Session, student_id: str) -
     soup = BeautifulSoup(resp.text, "html.parser")
 
     today_name = datetime.datetime.now().strftime("%A")  # e.g. "Tuesday"
-    classes = get_today_classes(soup, weekday=today_name)
+    results = get_today_classes(soup, weekday=today_name)
     
-    return classes
+    return results
 
 def get_student_current_attendance(eminerva_session: requests.Session, student_id: str) -> dict:
     if student_id[0] == "s":

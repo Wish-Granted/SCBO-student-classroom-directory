@@ -53,7 +53,7 @@ def get_today_classes(soup: BeautifulSoup, weekday="Monday"):
     if day_index is None:
         raise ValueError(f"Could not find weekday column for '{weekday}'")
 
-    results = []
+    results = {"classes": [], "alternate_activities": []}
 
     for row in rows[1:]:
         cells = row.find_all("td", recursive=False)
@@ -64,12 +64,20 @@ def get_today_classes(soup: BeautifulSoup, weekday="Monday"):
         period_label_cell = cells[0]
         period_text = period_label_cell.get_text(" ", strip=True)
 
-        if "break" in period_text.lower() or "activity" in period_text.lower():
+        if "break" in period_text.lower():
             continue  # skip First/Second Break and the empty "Activity" row
 
         day_cell = cells[day_index]
         inner_tables = day_cell.find_all("table")
         if not inner_tables:
+            continue
+
+        if "activity" in period_text.lower():
+            for activity_table in inner_tables:
+                activity_rows = activity_table.find_all("tr", recursive=False)
+                activity_info = activity_rows[0].get_text(strip=True)
+                activity_teacher = activity_rows[1].get_text(strip=True)
+                results["alternate_activities"].append({"activity_info":activity_info, "activity_teacher": activity_teacher})
             continue
 
         # The class info is always in the LAST inner table of the cell
@@ -101,7 +109,7 @@ def get_today_classes(soup: BeautifulSoup, weekday="Monday"):
             teacher_name = cell_texts[1] if len(cell_texts) > 1 else ""
             classroom_raw = cell_texts[2] if len(cell_texts) > 2 else ""
 
-        results.append({
+        results["classes"].append({
             "period_info": parse_period_info(period_text),
             "class_code": class_code,
             "class_name": class_name,

@@ -76,7 +76,8 @@ async function doStudentSearch() {
 function displayTimetableData(data) {
     let timetableTable = document.getElementById("timetableTable");
     timetableTable.innerHTML = ""; 
-    for (let r = 0; r < data.length+1; r++) {
+    classes = data["classes"]
+    for (let r = 0; r < classes.length+1; r++) {
         let row = timetableTable.insertRow();
 
         for (let c = 0; c < 8; c++) {
@@ -87,30 +88,30 @@ function displayTimetableData(data) {
             }
             switch (c) {
             case 0:
-                cell.textContent = data[r-1].period_info.period_name
+                cell.textContent = classes[r-1].period_info.period_name
                 break;
             case 1:
-                const start_time_obj = new Date(data[r-1].period_info.start_time)
+                const start_time_obj = new Date(classes[r-1].period_info.start_time)
                 cell.textContent = timeFormatter.format(start_time_obj)
                 break;
             case 2:
-                const end_time_obj = new Date(data[r-1].period_info.end_time)
+                const end_time_obj = new Date(classes[r-1].period_info.end_time)
                 cell.textContent = timeFormatter.format(end_time_obj)
                 break;
             case 3:
-                cell.textContent = data[r-1].classroom_info.phone
+                cell.textContent = classes[r-1].classroom_info.phone
                 break;
             case 4:
-                cell.textContent = data[r-1].classroom_info.location
+                cell.textContent = classes[r-1].classroom_info.location
                 break;
             case 5:
-                cell.textContent = data[r-1].teacher_name
+                cell.textContent = classes[r-1].teacher_name
                 break;
             case 6:
-                cell.textContent = data[r-1].class_code
+                cell.textContent = classes[r-1].class_code
                 break;
             case 7:
-                cell.textContent = data[r-1].class_name
+                cell.textContent = classes[r-1].class_name
                 break;
             }
         }
@@ -124,6 +125,7 @@ function displayTimetableData(data) {
     timetableTable.rows[0].cells[6].textContent = "Class Code"
     timetableTable.rows[0].cells[7].textContent = "Class Name"
 
+    document.getElementById('rawAlternateActivities').textContent = JSON.stringify(data["alternate_activities"], null, 2);
 }
 
 async function updatePeriodTable(periodData, studentId) {
@@ -145,7 +147,7 @@ function displayPeriodData(data, studentId) {
     const nowTime = new Date()
     let currentPeriodData = false 
     let indexCount = 0
-    data.forEach(periodData => {
+    data["classes"].forEach(periodData => {
     const periodInfo = periodData.period_info
     const startTime = new Date(periodInfo.start_time)
     const startTimeFormatted = timeFormatter.format(startTime)
@@ -176,6 +178,19 @@ function displayPeriodData(data, studentId) {
     } else {
     console.log("wthelly!?!")
     }
+
+    let alternateActivities = document.getElementById("alternateActivities");
+    let alternateActivitiesString = ""
+    data["alternate_activities"].forEach(activity => {
+        alternateActivitiesString += activity["activity_info"] + "\n" + activity["activity_teacher"] + "\n\n"
+    });
+    if (alternateActivities == "") {
+        alternateActivities.textContent = "No Alternate Activites"
+        alternateActivities.style.color = "black"
+    }
+
+    document.getElementById('alternateActivities').textContent = alternateActivitiesString.slice(0,-2);
+    alternateActivities.style.color = "red"
 }
 
 async function doTimetableSearch() {
