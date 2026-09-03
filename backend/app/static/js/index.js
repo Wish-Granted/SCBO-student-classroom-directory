@@ -142,7 +142,8 @@ async function updatePeriodTable(periodData, studentId) {
     periodRow.cells[5].textContent = periodData.teacher_name
 }
 
-function displayPeriodData(data, studentId) {
+function displayPeriodData(data, studentId) {   
+    const periodSelection = document.getElementById("periodSelection");
     periodSelection.length = 0; //delete all current options
     const nowTime = new Date()
     let currentPeriodData = false 
@@ -234,6 +235,9 @@ async function doFullStudentSearch() {
     const resp = await apiFetch(`/api/eminerva/info/${encodeURIComponent(q)}`);
     const data = await resp.json();
     console.log(data)
+
+    loadedTimetables = {}
+    loadedTimetables[q] = data.timetable
 
     displayAttendance(data.attendance_status)
     displayTimetableData(data.timetable)

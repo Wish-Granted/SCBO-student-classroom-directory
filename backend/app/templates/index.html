@@ -101,8 +101,8 @@
     periodSelection.addEventListener('change', (event) => {
         const selectedValue = event.target.value;
         for (const [key, value] of Object.entries(loadedTimetables)) {
-        data = value
-        updatePeriodTable(data[selectedValue], key)
+        const data = value
+        updatePeriodTable(data["classes"][selectedValue], key)
         }
     });
   </script>
