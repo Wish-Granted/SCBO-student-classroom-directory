@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import datetime
 
+from flask import session, jsonify
 from .parse_data import get_today_classes, get_attendance_from_soup
 
 class EminervaSessionExpired(Exception):
@@ -40,3 +41,16 @@ def get_student_current_attendance(eminerva_session: requests.Session, student_i
     attendance_status = get_attendance_from_soup(soup)
 
     return attendance_status
+
+def attempt_twice(func, retry_message:str):
+    MAX_ATTEMPTS = 2
+    attemps = 0
+    while attemps < MAX_ATTEMPTS:
+        try:
+            return func()
+        except ValueError as e:
+            if attemps > 0:
+                raise e
+            attemps += 1
+            print(retry_message)
+    return None
