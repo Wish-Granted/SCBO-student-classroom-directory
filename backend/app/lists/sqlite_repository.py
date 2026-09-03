@@ -50,7 +50,7 @@ class SQLiteRepository(ListRepository):
 
     def get_list(self, list_id: int) -> dict | None:
         with self._connect() as conn:
-            row = conn.execute("SELECT * FROM lists WHERE id = ?", (str(list_id))).fetchone()
+            row = conn.execute("SELECT * FROM lists WHERE id = ?", (str(list_id),)).fetchone()
             return dict(row) if row else None
 
     def update_list(self, list_id: int, name: str = None, description: str =None) -> dict | None:
@@ -67,7 +67,7 @@ class SQLiteRepository(ListRepository):
 
     def delete_list(self, list_id: int):
         with self._connect() as conn:
-            cur = conn.execute("DELETE FROM lists WHERE id = ?", (str(list_id)))
+            cur = conn.execute("DELETE FROM lists WHERE id = ?", (str(list_id),))
             return cur.rowcount > 0
 
     def add_students(self, list_id: int, student_ids: list[str]) -> list[dict]:
@@ -83,7 +83,7 @@ class SQLiteRepository(ListRepository):
 
     def get_list_items(self, list_id: int) -> list[dict]:
         with self._connect() as conn:
-            rows = conn.execute("SELECT * FROM list_items WHERE list_id = ? ORDER BY added_at", (str(list_id))).fetchall()
+            rows = conn.execute("SELECT * FROM list_items WHERE list_id = ? ORDER BY added_at", (str(list_id),)).fetchall()
             return [dict(r) for r in rows]
 
     def set_called(self, list_id: int, student_id: str, called: bool) -> dict | None:
