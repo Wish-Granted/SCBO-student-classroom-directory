@@ -33,10 +33,120 @@ async function doDeleteList() {
   document.getElementById('results').textContent = JSON.stringify(data, null, 2);
 }
 
-async function doGetAllStudentInfo() {
-  const id = document.getElementById('openDeletelistIdBox').value;
+const timeFormatter = new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+});
+function getMsSinceMidnight(date) {
+    return (
+    date.getHours() * 3600000 +
+    date.getMinutes() * 60000 +
+    date.getSeconds() * 1000 +
+    date.getMilliseconds()
+    );
+}
+function setPeriodDropdown(classes) {
+  const periodSelection = document.getElementById("periodSelection");
+  periodSelection.length = 0; 
+  const nowTime = new Date()
+  let indexCount = 0
+  let currentPeriod = 0
+  classes.forEach(periodData => {
+    const periodInfo = periodData.period_info
+    const startTime = new Date(periodInfo.start_time)
+    const startTimeFormatted = timeFormatter.format(startTime)
+    const endTime = new Date(periodInfo.end_time)
+    const endTimeFormatted = timeFormatter.format(endTime)        
+    const periodName = periodInfo.period_name
+
+    let periodOption = document.createElement("option")
+    periodOption.text = periodName + " | " + startTimeFormatted + " - " + endTimeFormatted
+    periodOption.value = indexCount
+
+    periodSelection.add(periodOption)
+
+    const nowMs = getMsSinceMidnight(nowTime)
+    const startMs = getMsSinceMidnight(startTime)
+    const endMs = getMsSinceMidnight(endTime)
+    if (nowMs >= startMs && nowMs < endMs) {
+        currentPeriod = indexCount
+        periodSelection.value = indexCount
+    } else if (nowMs > startMs) {
+        currentPeriod = indexCount
+        periodSelection.value = indexCount
+    }
+    indexCount++
+  });
+
+  return currentPeriod
+}
+function updateListTable(currentPeriod) {
+  //empty list table
+  const listTableBody = document.querySelector('#listTable tbody')
+  listTableBody.innerHTML = '';
+
+  loadedTimetables.forEach(studentData => {
+    const newRow = document.createElement('tr');
+    const periodData = studentData.timetable.classes[currentPeriod]
+
+    let calledInfo = "Not yet called"
+    if (studentData.called) {
+      calledInfo = "Called at " + studentData.called_at}
+
+    let alternateActivitiesString = "None"
+    if (studentData.timetable.alternate_activities.length > 0) {
+      studentData.timetable.alternate_activites.forEach(activity => {
+        alternateActivitiesString += activity["activity_info"] + " with " + activity["activity_teacher"] + "  |  "
+      })
+    }
+
+    newRow.innerHTML = `
+      <td>${studentData.first_name + " " + studentData.last_name}</td>
+      <td>${periodData.classroom_info.phone}</td>
+      <td>${studentData.attendance_status}</td>
+      <td>${periodData.classroom_info.location}</td>
+      <td>${studentData.year_level}</td>
+      <td>${periodData.class_name}</td>
+      <td>${periodData.teacher_name}</td>
+      <td>${calledInfo}</td>
+      <td>${alternateActivitiesString}</td>
+      <td>${periodData.class_code}</td>
+      <td>${studentData.class}</td>
+      <td>${studentData.student_id}</td>
+      <td>${studentData.added_at}</td>
+      <td>${studentData.username}</td>
+    `;
+    
+    listTableBody.appendChild(newRow);
+  });
+}
+let loadedListId = null
+let loadedTimetables = {}
+async function doGetAllStudentInfo(refresh=false) {
+  let id = document.getElementById('openDeletelistIdBox').value;
+  if (refresh) {
+    id = loadedListId
+  }
+  if (!id) {
+    document.getElementById('results').textContent = "Error, no list ID entered"
+    return
+  }
   const resp = await apiFetch(`/api/lists/${encodeURIComponent(id)}/info`);
   const data = await resp.json();
+
+  console.log(data)
+  loadedTimetables = data
+  loadedListId = id
+
+  const listDetailsresp = await apiFetch(`/api/lists/${encodeURIComponent(id)}`);
+  const listDetails = await listDetailsresp.json();
+  document.getElementById('listTitle').textContent = listDetails.name
+  document.getElementById('listDescription').textContent = listDetails.description
+
+  let currentPeriod = setPeriodDropdown(data[0]["timetable"]["classes"])
+  updateListTable(currentPeriod)
+
   document.getElementById('results').textContent = JSON.stringify(data, null, 2);
 }
 

@@ -149,35 +149,35 @@ function displayPeriodData(data, studentId) {
     let currentPeriodData = false 
     let indexCount = 0
     data["classes"].forEach(periodData => {
-    const periodInfo = periodData.period_info
-    const startTime = new Date(periodInfo.start_time)
-    const startTimeFormatted = timeFormatter.format(startTime)
-    const endTime = new Date(periodInfo.end_time)
-    const endTimeFormatted = timeFormatter.format(endTime)        
-    const periodName = periodInfo.period_name
+        const periodInfo = periodData.period_info
+        const startTime = new Date(periodInfo.start_time)
+        const startTimeFormatted = timeFormatter.format(startTime)
+        const endTime = new Date(periodInfo.end_time)
+        const endTimeFormatted = timeFormatter.format(endTime)        
+        const periodName = periodInfo.period_name
 
-    let periodOption = document.createElement("option")
-    periodOption.text = periodName + " | " + startTimeFormatted + " - " + endTimeFormatted
-    periodOption.value = indexCount
+        let periodOption = document.createElement("option")
+        periodOption.text = periodName + " | " + startTimeFormatted + " - " + endTimeFormatted
+        periodOption.value = indexCount
 
-    periodSelection.add(periodOption)
+        periodSelection.add(periodOption)
 
-    const nowMs = getMsSinceMidnight(nowTime)
-    const startMs = getMsSinceMidnight(startTime)
-    const endMs = getMsSinceMidnight(endTime)
-    if (nowMs >= startMs && nowMs < endMs) {
-        currentPeriodData = periodData
-        periodSelection.value = indexCount
-    } else if (nowMs > startMs) {
-        currentPeriodData = periodData
-        periodSelection.value = indexCount
-    }
-    indexCount++
+        const nowMs = getMsSinceMidnight(nowTime)
+        const startMs = getMsSinceMidnight(startTime)
+        const endMs = getMsSinceMidnight(endTime)
+        if (nowMs >= startMs && nowMs < endMs) {
+            currentPeriodData = periodData
+            periodSelection.value = indexCount
+        } else if (nowMs > startMs) {
+            currentPeriodData = periodData
+            periodSelection.value = indexCount
+        }
+        indexCount++
     });
     if (currentPeriodData) {
-    updatePeriodTable(currentPeriodData, studentId)
+        updatePeriodTable(currentPeriodData, studentId)
     } else {
-    console.log("wthelly!?!")
+        console.log("wthelly!?!")
     }
 
     let alternateActivities = document.getElementById("alternateActivities");

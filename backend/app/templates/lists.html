@@ -5,6 +5,26 @@
   <title>Lists</title>
   <script src="{{ url_for('static', filename='js/api.js') }}"></script>
   <script src="{{ url_for('static', filename='js/lists.js') }}"></script>
+
+  <style>
+    table {
+    border-collapse: collapse;
+    width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    margin-top: 0.5em;
+    border-radius: 3px;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+  }
+
+  th {
+    background-color: rgb(235, 235, 235);
+  }
+  </style>
 </head>
 <body>
   <a href="{{ url_for('main.index') }}">&larr; Back to search</a>
@@ -34,7 +54,52 @@
   <button onclick="doMarkCalled(false)">Unmark called</button>
 
   <div style="margin-top: 40px;">
+    <div>
+      <div style="display:flex; justify-content:space-between; padding-left: 1em; padding-right: 1em">
+        <div>
+          <span id="listTitle" style="font-size: 1.5em; font-weight: bold; display: block">No list loaded</span>
+          <span id="listDescription" style="font-size: 1em; display: block">No list loaded</span>
+        </div>
+        <div>
+          <label for="periodSelection">Select Period: </label>
+          <select id="periodSelection" name="periodSelection">
+            <option value="" disabled selected>N/A</option>
+          </select>
+          <button onclick="doGetAllStudentInfo(true)">Refresh</button>
+        </div>
+      </div>
+      <table id="listTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Attendance</th>
+            <th>Location</th>
+            <th>Year Level</th>
+            <th>Class Name</th>
+            <th>Teacher</th>
+            <th>Called</th>
+            <th>Alternate Activities</th>
+            <th>Class Code</th>
+            <th>PC</th>
+            <th>Student ID</th>
+            <th>Added at</th>
+            <th>Username</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    
     <pre id="results"></pre>
   </div>
+  <script>
+    const periodSelection = document.getElementById("periodSelection");
+    periodSelection.addEventListener('change', (event) => {
+        const selectedValue = event.target.value;
+        updateListTable(selectedValue)
+    });
+  </script>
 </body>
 </html>
