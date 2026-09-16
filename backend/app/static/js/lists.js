@@ -96,8 +96,14 @@ function updateListTable(currentPeriod) {
 
     let alternateActivitiesString = "None"
     if (studentData.timetable.alternate_activities.length > 0) {
-      studentData.timetable.alternate_activites.forEach(activity => {
-        alternateActivitiesString += activity["activity_info"] + " with " + activity["activity_teacher"] + "  |  "
+      alternateActivitiesString = ""
+      let count = 0;
+      studentData.timetable.alternate_activities.forEach(activity => {
+        alternateActivitiesString += activity["activity_info"] + " with " + activity["activity_teacher"]
+        if (count < studentData.timetable.alternate_activities.length) {
+          alternateActivitiesString += "  |  "
+        }
+        count++
       })
     }
 
