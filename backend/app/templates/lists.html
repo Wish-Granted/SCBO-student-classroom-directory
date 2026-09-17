@@ -40,6 +40,7 @@
   <button onclick="doGetListDetail()">Open list</button>
   <button onclick="doDeleteList()">Delete list</button>
   <button onclick="doGetAllStudentInfo()">Get Student Info</button>
+  <button onclick="doGetAllStudentInfoSequential()">Get Student Info (one by one)</button>
   <br><br>
   <input id="updateListIdBox" placeholder="List ID">
   <input id="updateListNameBox" placeholder="Updated list name">
@@ -97,8 +98,9 @@
   <script>
     const periodSelection = document.getElementById("periodSelection");
     periodSelection.addEventListener('change', (event) => {
-        const selectedValue = event.target.value;
-        updateListTable(selectedValue)
+        renderAllRows(Number(event.target.value));
+        //const selectedValue = event.target.value;
+        //updateListTable(selectedValue)
     });
   </script>
 </body>
