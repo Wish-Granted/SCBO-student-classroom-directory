@@ -38,14 +38,15 @@ function createLoginWindow() {
       })()
     `);
     if (url.includes(EMINERVA_LOGGED_IN_URL_PATTERN) && !is401Error) {
-      await captureAndSendCookies(loginWindow);
-      loginWindow.close();
-
+      console.log("login successful, creating new window")
       if (mainWindow) {
         mainWindow.webContents.reload();
       } else {
         createMainWindow();
       }
+      console.log("sending cookies to redis")
+      await captureAndSendCookies(loginWindow);
+      loginWindow.close();
     }
   });
 }
