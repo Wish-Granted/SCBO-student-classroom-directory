@@ -14,7 +14,7 @@ class Config:
     SESSION_TYPE = "redis"
     SESSION_PERMANENT = True
     PERMANENT_SESSION_LIFETIME = timedelta(1)
-    SESSION_USER_SIGNER = True
+    SESSION_USE_SIGNER = True
     SESSION_REDIS = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
 
     SESSION_COOKIE_SECURE = True
