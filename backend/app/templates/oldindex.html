@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Lookup</title>
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+
+<style>
+  .screen-container {
+  display: flex;       /* Aligns children horizontally */
+  width: 100vw;        /* Spans 100% of the viewport width */
+  height: 100vh;       /* Spans 100% of the viewport height (optional) */
+  }
+
+  .left-box, .right-box {
+    width: 30%;          /* Forces each div to take up exactly half the width */
+    box-sizing: border-box; /* Ensures padding/borders don't break the 50% width */
+  }
+
+    table {
+    border-collapse: collapse;
+    width: auto;
+    margin: 8px;
+    border-radius: 3px;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+  }
+
+  th {
+    background-color: rgb(235, 235, 235);
+  }
+</style>
+</head>
+<body>
+  <div class="screen-container">
+    <div class="left-box">
+      <a href="{{ url_for('main.lists_page') }}">Go to Lists</a>
+      <br><br>
+      <h1>Student Search</h1>
+      <input id="studentSearchBox" placeholder="Search students...">
+      <button onclick="doStudentSearch()">Search</button>
+
+      <h1>Timetable Search</h1>
+      <input id="timetableSearchBox" placeholder="Search a student timetable...">
+      <button onclick="doTimetableSearch()">Search</button>
+
+      <h1>Attendance Check</h1>
+      <input id="attendanceSearchBox" placeholder="Check student attendance...">
+      <button onclick="doAttendanceCheck()">Search</button>
+
+      <h1>Full Student Search</h1>
+      <input id="fullStudentSearchBox" placeholder="Get student information...">
+      <button onclick="doFullStudentSearch()">Search</button>
+    </div>
+    <div class="right-box" style="padding-left: 75px; height: 100%; border-left: 3px solid black;">
+      <div>
+        <h3 style="display:inline;">Student Info:</h3>
+        <pre id="attendanceStatus" style="color:black;">None</pre>
+        <pre id="alternateActivities" style="color: black;">None</pre>
+        <label for="periodSelection">Select Period: </label>
+        <select id="periodSelection" name="periodSelection">
+          <option value="" disabled selected>N/A</option>
+        </select>
+        <table id="periodTable">
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Year Level</th>
+            <th>Class Name</th>
+            <th>Teacher</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+      <div style="margin-top: 10px;">
+        <h3 style="display:inline;">Student Search:</h3>
+      </div>
+      <table id="studentTable">
+      </table>
+      <br>
+      <h3 style="display:inline;">Raw Data:</h3>
+      <pre id="rawAlternateActivities">None</pre>
+      <table id="timetableTable">
+      </table>
+      <pre id="results"></pre>
+    </div>
+  </div>
+  <script>
+    const periodSelection = document.getElementById("periodSelection");
+    periodSelection.addEventListener('change', (event) => {
+        const selectedValue = event.target.value;
+        for (const [key, value] of Object.entries(loadedTimetables)) {
+        const data = value
+        updatePeriodTable(data["classes"][selectedValue], key)
+        }
+    });
+  </script>
+</body>
+</html>
