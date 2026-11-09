@@ -48,7 +48,7 @@ def attempt_twice(func, retry_message:str):
     while attemps < MAX_ATTEMPTS:
         try:
             return func()
-        except ValueError as e:
+        except (ValueError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             if attemps > 0:
                 raise e
             attemps += 1
