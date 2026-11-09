@@ -378,20 +378,30 @@ async function loadTimetable(id) {
     renderSelected();
 }
 
+const describeActivity = (a) => {
+    if (typeof a === "string") return a;
+    const info = a?.activity_info ?? "";
+    const teacher = a?.activity_teacher;
+    return teacher ? `${info} (${teacher})` : info;
+};
+
 function getStatus(student) {
     if (student.timetable === undefined) return null;   // still loading
     if (student.loadFailed) return { key: "unknown", tip: "Couldn't load attendance" };
 
     const alt = student.timetable.alternate_activities;
-    const altText = alt.length ? `Alternate activities: ${alt.join(", ")}` : "";
+    const altText = alt.length ? `Alternate activities:\n${alt.map(describeActivity).join("\n")}` : "";
 
     if (String(student.attendance_status).includes("Presence")) {
         return {
             key: altText ? "alternate" : "present",
-            tip: altText ? `Student present. ${altText}` : "Student present",
+            tip: altText ? `Student present.\n${altText}` : "Student present",
         };
     }
-    return { key: "absent", tip: altText ? `Student not present. ${altText}` : "Student not present" };
+    return {
+        key: "absent",
+        tip: altText ? `Student not present.\n${altText}` : "Student not present",
+    };
 }
 
 function currentSlot(student, now = new Date()) {
@@ -407,7 +417,8 @@ function currentSlot(student, now = new Date()) {
     const mins = now.getHours() * 60 + now.getMinutes();
     const pick =
         classes.find((x) => mins >= x.start && mins < x.end) ??
-        classes.find((x) => x.start > mins);
+        classes.find((x) => x.start > mins) ??
+        classes[classes.length - 1];   // school is finished, show their last class
     if (!pick) return null;
 
     const c = pick.c;
