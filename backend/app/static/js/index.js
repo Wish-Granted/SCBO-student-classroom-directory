@@ -157,7 +157,7 @@ function saveState() {
 function restoreState() {
     try {
         const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? "null");
-        if (!saved) return;
+        if (!saved) { renderSelected(); return; };
 
         if (Array.isArray(saved.students)) selectedStudents = saved.students;
         (saved.called ?? []).forEach((id) => calledIds.add(id));
@@ -389,7 +389,7 @@ function getStatus(student) {
     if (student.timetable === undefined) return null;   // still loading
     if (student.loadFailed) return { key: "unknown", tip: "Couldn't load attendance" };
 
-    const alt = student.timetable.alternate_activities;
+    const alt = student.timetable.alternate_activities ?? [];
     const altText = alt.length ? `Alternate activities:\n${alt.map(describeActivity).join("\n")}` : "";
 
     if (String(student.attendance_status).includes("Presence")) {
@@ -474,6 +474,7 @@ async function saveNotes() {
 
     } catch (err) {
         console.error("Notes save failed:", err);
+        notesSaveTimer = setTimeout(saveNotes, 5000);
 
     } finally {
         notesSaving = false;
