@@ -6,6 +6,7 @@ const selectAllStudents = document.getElementById("selectAllStudents");
 const notes = document.getElementById("notes");
 
 document.getElementById("reloadSelected").addEventListener("click", reloadSelected);
+document.getElementById("removeAllSelected").addEventListener("click", removeAllSelected);
 
 const searchTable = studentTableBody.closest("table");
 const selectedTable = selectedStudentsTableBody.closest("table");
@@ -48,8 +49,9 @@ const selectedSort = { key: "called", dir: 1 };    // default for the selected t
 const SEARCH_TIEBREAKERS = ["name"];
 const SELECTED_TIEBREAKERS = ["status", "year_level", "phone", "class", "name"];
 
-new bootstrap.Tooltip(selectedStudentsTableBody, {
+new bootstrap.Tooltip(document.body, {
     selector: '[data-bs-toggle="tooltip"]',
+    animation: false,
 });
 
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
@@ -438,6 +440,13 @@ function reloadSelected() {
     });
     renderSelected();
     selectedStudents.forEach((s) => loadTimetable(s.id));
+}
+
+function removeAllSelected() {
+    selectedStudents = [];
+    saveState();
+    renderSelected();
+    renderStudents();
 }
 
 // NOTES vv
