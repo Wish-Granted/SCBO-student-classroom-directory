@@ -2,6 +2,7 @@ const studentSearchBox = document.getElementById("studentSearchBox");
 const studentTableBody = document.getElementById("studentTableBody");
 const selectedStudentsTableBody = document.getElementById("selectedStudentsTableBody");
 const selectAllStudents = document.getElementById("selectAllStudents");
+const lastUpdated = document.getElementById("selectedStudentsLastUpdated");
 
 const notes = document.getElementById("notes");
 
@@ -140,6 +141,21 @@ bindSortHeaders(selectedTable, selectedSort, () => {
     renderSelected();
     saveState();
 });
+
+function getFormattedTimeString() {
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = now.getFullYear();
+
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}`;
+
+    return formattedDateTime;
+}
 
 // For selection persistance vv
 const STORAGE_KEY = "bminerva.selectedStudents";
@@ -361,6 +377,7 @@ function deselectStudents(ids) {
 async function loadTimetable(id) {
     let info;
     let failed = false;
+    lastUpdated.textContent = `Last Updated: ${getFormattedTimeString()}`
     try {
         const resp = await apiFetch(`/api/eminerva/info/${encodeURIComponent(id)}`);
         if (resp.ok === false) throw new Error(`HTTP ${resp.status}`);
@@ -443,6 +460,7 @@ function reloadSelected() {
 }
 
 function removeAllSelected() {
+    if (selectedStudents.length() == 0) return;
     selectedStudents = [];
     saveState();
     renderSelected();
