@@ -147,9 +147,9 @@
                 </button>
             </div>
         </div>
-        <div class="row table-layout flex-nowrap mb-4">
-            <div class="col-7 d-flex flex-column pe-4">
-                <div class="input-group rounded mb-4">
+        <div class="row py-2">
+            <div class="col-7 d-flex flex-column pe-4 justify-content-center">
+                <div class="input-group rounded">
                     <input type="text" class="form-control" placeholder="Search for a student" id="studentSearchBox">
                     <button class="btn btn-outline-secondary" type="button" id="addSelectedToList">Add selected to
                         list</button>
@@ -161,6 +161,31 @@
                         <li><a class="dropdown-item" href="#">Email selected</a></li>
                     </ul>
                 </div>
+            </div>
+            <div class="col-5 d-flex flex-column px-0">
+                <div class="d-flex justify-content-center gap-2">
+                    <p class="h4">Selected Students</p>
+                    <button id="reloadSelected" type="button" class="btn text-secondary p-0 border-0 button-hover mb-1"
+                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Refresh">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+                            <path
+                                d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <select id="periodSelection" class="form-select form-select-sm w-50 text" disabled>
+                        <option selected>No timetables loaded</option>
+                    </select>
+                    <button id="periodSelectionNow" type="button" class="btn btn-sm btn-secondary" disabled>Now</button>
+                </div>
+            </div>
+        </div>
+        <div class="row table-layout flex-nowrap mb-4">
+            <div class="col-7 d-flex flex-column pe-4">
                 <div class="table-scroll border rounded">
                     <table class="table table-striped table-hover mb-0 text-nowrap">
                         <thead>
@@ -219,19 +244,6 @@
                 </div>
             </div>
             <div class="col-5 d-flex flex-column px-0">
-                <div class="d-flex justify-content-center align-items-center mb-4 px-3 gap-2">
-                    <p class="h4 text-center border border-white">Selected Students</p>
-                    <button id="reloadSelected" type="button" class="btn text-secondary p-0 border-0 button-hover mb-1"
-                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Refresh">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                            class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd"
-                                d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
-                            <path
-                                d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
-                        </svg>
-                    </button>
-                </div>
                 <div class="table-scroll border rounded">
                     <table class="table table-sm-body table-striped mb-0 text-nowrap">
                         <thead>

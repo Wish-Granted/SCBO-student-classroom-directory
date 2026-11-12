@@ -3,17 +3,29 @@ const studentTableBody = document.getElementById("studentTableBody");
 const selectedStudentsTableBody = document.getElementById("selectedStudentsTableBody");
 const selectAllStudents = document.getElementById("selectAllStudents");
 const lastUpdated = document.getElementById("selectedStudentsLastUpdated");
+const periodSelection = document.getElementById("periodSelection");
+const periodSelectionNow = document.getElementById("periodSelectionNow");
 
 const notes = document.getElementById("notes");
 
 document.getElementById("reloadSelected").addEventListener("click", reloadSelected);
 document.getElementById("removeAllSelected").addEventListener("click", removeAllSelected);
+periodSelectionNow.addEventListener("click", () => {
+    periodManuallySet = false;
+    renderSelected();
+    updatePeriodNowButton();
+});
 
 const searchTable = studentTableBody.closest("table");
 const selectedTable = selectedStudentsTableBody.closest("table");
 
 let searchCounter = 0;  // used to guard against out-of-order responses while typing
 let currentData = [];   // the last search results (unsorted)
+
+let periodListKey = "";  // detects when the set of periods changes
+let periodManuallySet = false;
+
+let lastUpdatedString = "Never"
 
 // escape stuff from server before putting it in an html string
 function esc(value) {
@@ -142,21 +154,6 @@ bindSortHeaders(selectedTable, selectedSort, () => {
     saveState();
 });
 
-function getFormattedTimeString() {
-    const now = new Date();
-
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const year = now.getFullYear();
-
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-
-    const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}`;
-
-    return formattedDateTime;
-}
-
 // For selection persistance vv
 const STORAGE_KEY = "bminerva.selectedStudents";
 
@@ -166,6 +163,7 @@ function saveState() {
             students: selectedStudents,
             called: [...calledIds],
             sort: selectedSort,
+            lastUpdated: lastUpdatedString,
         }));
     } catch (err) {
         console.error("Could not save selection:", err);
@@ -183,11 +181,16 @@ function restoreState() {
             selectedSort.key = saved.sort.key;
             selectedSort.dir = saved.sort.dir === -1 ? -1 : 1;
         }
+
+        if (saved.lastUpdated) {
+            lastUpdatedString = saved.lastUpdated;
+        }
     } catch (err) {
         console.error("Could not restore selection:", err);
         selectedStudents = [];
     }
 
+    lastUpdated.textContent = `Last Updated: ${lastUpdatedString}`;
     renderSelected();
     // anything that never finished loading (or failed) last time gets fetched again
     selectedStudents
@@ -325,6 +328,15 @@ function renderSelected() {
         .map((s) => buildSelectedRow(s, calledIds.has(s.id)))
         .join("");
     updateSortIndicators(selectedTable, selectedSort);
+    const classes = selectedStudents.find((s) => s.timetable?.classes?.length)?.timetable.classes;
+    if (classes) {
+        fillPeriodSelection(classes);
+    } else if (selectedStudents.length === 0) {
+        periodSelection.options.length = 0;
+        periodSelection.add(new Option("No students selected", ""));
+        periodSelection.disabled = true;
+        periodListKey = "";
+    }
 }
 
 let renderQueued = false;
@@ -377,7 +389,8 @@ function deselectStudents(ids) {
 async function loadTimetable(id) {
     let info;
     let failed = false;
-    lastUpdated.textContent = `Last Updated: ${getFormattedTimeString()}`
+    lastUpdatedString = getFormattedTimeString()
+    lastUpdated.textContent = `Last Updated: ${lastUpdatedString}`
     try {
         const resp = await apiFetch(`/api/eminerva/info/${encodeURIComponent(id)}`);
         if (resp.ok === false) throw new Error(`HTTP ${resp.status}`);
@@ -424,29 +437,18 @@ function getStatus(student) {
 }
 
 function currentSlot(student, now = new Date()) {
-    const classes = (student.timetable?.classes ?? [])
-        .map((c) => ({
-            c,
-            start: minutesOf(c.period_info?.start_time),
-            end: minutesOf(c.period_info?.end_time),
-        }))
-        .filter((x) => x.start !== null && x.end !== null)
-        .sort((a, b) => a.start - b.start);
-
-    const mins = now.getHours() * 60 + now.getMinutes();
-    const pick =
-        classes.find((x) => mins >= x.start && mins < x.end) ??
-        classes.find((x) => x.start > mins) ??
-        classes[classes.length - 1];   // school is finished, show their last class
-    if (!pick) return null;
-
-    const c = pick.c;
+    const classes = student.timetable?.classes ?? [];
+    const idx = periodManuallySet
+        ? Number(periodSelection.value)
+        : findCurrentClassIndex(classes, now);
+    const chosen = classes[idx];
+    if (!chosen) return null;
     return {
-        phone: c.classroom_info?.phone,
-        location: c.classroom_info?.location,
-        class_name: c.class_name,
-        teacher: c.teacher_name,
-        class_code: c.class_code,
+        phone: chosen.classroom_info?.phone,
+        location: chosen.classroom_info?.location,
+        class_name: chosen.class_name,
+        teacher: chosen.teacher_name,
+        class_code: chosen.class_code,
     };
 }
 
@@ -460,11 +462,82 @@ function reloadSelected() {
 }
 
 function removeAllSelected() {
-    if (selectedStudents.length() == 0) return;
+    if (selectedStudents.length == 0) return;
     selectedStudents = [];
     saveState();
     renderSelected();
     renderStudents();
+}
+
+periodSelection.addEventListener("change", () => {
+    periodManuallySet = true;
+    renderSelected();
+    updatePeriodNowButton();
+});
+
+function fillPeriodSelection(classes) {
+    // Only rebuild if the periods have changed (e.g. first load or a different day)
+    const key = classes.map((c) => c.period_info?.raw).join("|");
+    if (key !== periodListKey) {
+        periodListKey = key;
+
+        const timeFormatter = new Intl.DateTimeFormat("en-AU", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+        });
+
+        periodSelection.options.length = 0;
+        classes.forEach((c, i) => {
+            const p = c.period_info;
+            const start = timeFormatter.format(new Date(p.start_time));
+            const end = timeFormatter.format(new Date(p.end_time));
+            periodSelection.add(new Option(`${p.period_name} \u00B7 ${start} - ${end}`, i));
+        });
+        periodSelection.disabled = false;
+    }
+
+    if (!periodManuallySet) {
+        const idx = findCurrentClassIndex(classes);
+        if (idx >= 0) periodSelection.value = String(idx);
+    }
+}
+
+function findCurrentClassIndex(classes, now = new Date()) {
+    const mins = now.getHours() * 60 + now.getMinutes();
+    const slots = (classes ?? [])
+        .map((c, i) => ({
+            i,
+            start: minutesOf(c.period_info?.start_time),
+            end: minutesOf(c.period_info?.end_time),
+        }))
+        .filter((x) => x.start !== null && x.end !== null)
+        .sort((a, b) => a.start - b.start);
+
+    const pick =
+        slots.find((x) => mins >= x.start && mins < x.end) ??
+        slots.find((x) => x.start > mins) ??
+        slots[slots.length - 1];
+    return pick ? pick.i : -1;
+}
+
+function getFormattedTimeString() {
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = now.getFullYear();
+
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}`;
+
+    return formattedDateTime;
+}
+
+function updatePeriodNowButton() {
+    periodSelectionNow.disabled = !periodManuallySet;
 }
 
 // NOTES vv
@@ -534,4 +607,5 @@ doStudentSearch("")
 
 // selected students
 restoreState();
+updatePeriodNowButton();
 setInterval(renderSelected, 60000); // rerender every minute to check for period changes
