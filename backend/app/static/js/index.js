@@ -159,8 +159,8 @@ const STORAGE_KEY = "bminerva.selectedStudents";
 
 function saveState() {
     try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-            students: selectedStudents,
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            students: selectedStudents.map(({ timetable, attendance_status, loadFailed, ...s }) => s),
             called: [...calledIds],
             sort: selectedSort,
             lastUpdated: lastUpdatedString,

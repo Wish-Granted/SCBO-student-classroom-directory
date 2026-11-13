@@ -89,7 +89,7 @@ function createMainWindow() {
     height: 800,
     webPreferences: {
       session: session.fromPartition('persist:app'),
-      contextIsolation: true,
+      contextIsolation: false,
       nodeIntegration: false,
       preload: path.join(__dirname, "preload.js")
     },
@@ -111,11 +111,11 @@ function handleSessionExpired() {
 async function logout() {
   await session.fromPartition('persist:eminerva').clearStorageData();
 
+  const appSession = session.fromPartition('persist:app');
+  await appSession.clearStorageData({ storages: ['localstorage'] });
+
   try {
-    await fetch(`${BACKEND_URL}/api/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
+    await fetch(`${BACKEND_URL}/api/auth/logout`, {method: 'POST'});
   } catch (e) {
     // backend unreachable -- still proceed with local logout
   }

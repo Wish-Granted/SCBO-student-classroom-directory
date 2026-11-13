@@ -7,7 +7,7 @@ from .lists.sqlite_repository import SQLiteRepository
 from .lists.routes import lists_bp
 from .notes.txt_notes import TXTNotes
 from .notes.routes import notes_bp
-from .auth.routes import auth_bp
+from .auth.routes import auth_bp, web_auth_bp
 from .eminerva.routes import eminerva_bp
 from .main.routes import main_bp
 from .extensions import session_ext
@@ -25,6 +25,7 @@ def create_app():
     
     app.register_blueprint(students_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(web_auth_bp)
     app.register_blueprint(eminerva_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(lists_bp)
